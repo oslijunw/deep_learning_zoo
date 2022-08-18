@@ -11,7 +11,7 @@ transform_ops = {
     "train" : transforms.Compose(
         [   transforms.Resize(224),
             transforms.RandomCrop(224), # 随机裁剪
-            transforms.RandomHorizontalFlip(),
+            transforms.RandomHorizontalFlip(), # 随机水平翻转
             transforms.ToTensor(), # 转化为张量，调整为C H W模式
             transforms.Normalize((.5, .5, .5), (.5, .5, .5)) # 三通道
         ],
