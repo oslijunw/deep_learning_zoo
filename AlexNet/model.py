@@ -1,14 +1,16 @@
 import torch.nn as nn
 import torch
 
+
 class AlexNet(nn.Module):
-    def __init__(self, init_weight:bool=False, num_classes:int=1000) -> None:
+    def __init__(self, init_weight: bool = False, num_classes : int = 1000) -> None:
         super().__init__()
         # 提取图片特征
         self.backbone = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=48, kernel_size=11, stride=4, padding=2), 
             # nn.ZeroPad2d((1, 2, 1, 2)), 精准填充
-            nn.ReLU(inplace=True), # inplace是以时间换空间
+            nn.ReLU(inplace=True),
+            # inplace是以时间换空间
             nn.MaxPool2d(kernel_size=3, stride=2), 
             nn.Conv2d(in_channels=48, out_channels=128, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
