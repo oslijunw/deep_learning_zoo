@@ -1,12 +1,3 @@
-# 1x1的卷积核用作降维以及映射操作
-# 一共有三个分类器，增加两个辅助分类器辅助训练
-# 丢弃全连接层，使用平均池化层，以降低模型的参数
-from configparser import BasicInterpolation
-from multiprocessing.context import BaseContext
-from pydoc import resolve
-from re import T
-import re
-from tkinter.messagebox import NO
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -145,6 +136,11 @@ class AuxiliaryClassifier(nn.Module):
 
 
 class GoogLeNet(nn.Module):
+    """
+    1x1的卷积核用作降维以及映射操作
+    一共有三个分类器，增加两个辅助分类器辅助训练
+    丢弃全连接层，使用平均池化层，以降低模型的参数
+    """
     def __init__(self, num_class:int=1000, aux_logits:bool = True, init_weight:bool=True) -> None:
         super().__init__()
         self.aux_logits = aux_logits
@@ -263,7 +259,7 @@ class GoogLeNet(nn.Module):
             return x, aux2, aux1
         
         return x
-        
+
     def _init_weights(self):
         """
         尽管GoogLeNet比较复杂,但是本质还是由卷积和全连接层构成的
