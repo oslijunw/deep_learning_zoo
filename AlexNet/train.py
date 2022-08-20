@@ -47,7 +47,7 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         pred_label = torch.max(pred, dim=1)[1]
-        batch_acc += (pred_label==labels).numpy().sum()/len(images)
+        batch_acc += (pred_label == labels).numpy().sum()/len(images)
         epoch_loss += loss.item()
         print(f'epoch {epoch}, step {step} : loss {loss.item()}, batch accuracy {batch_acc}')
         
