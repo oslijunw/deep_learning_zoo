@@ -129,7 +129,7 @@ class AuxiliaryClassifier(nn.Module):
 
         # [N 1024]
         # 最后一层一般由softmax当激活函数，这边不需要操作
-        x = self.fc1(x)
+        x = self.fc2(x)
 
         # [N num_class]
         return x
@@ -250,6 +250,8 @@ class GoogLeNet(nn.Module):
         
         # N 1024 7 7
         x = self.pooling_avg(x)
+        x = torch.flatten(x, 1)
+
         # N 1024 1 1
         x = self.dropout(x)
         x = self.fc(x)
@@ -269,8 +271,7 @@ class GoogLeNet(nn.Module):
             if isinstance(layer, nn.Conv2d):
                 nn.init.kaiming_normal_(
                     layer.weight,
-                    mode="fan_out",
-                    nonlinearity=""
+                    mode="fan_out"
                 )
                 if layer.bias is not None:
                     nn.init.constant_(layer.bias, 0)
