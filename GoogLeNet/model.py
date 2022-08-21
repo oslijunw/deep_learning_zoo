@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
 class BasicConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, **kwargs) -> None:
         super().__init__()
@@ -16,6 +15,7 @@ class BasicConv2d(nn.Module):
     
     def forward(self, x):
         return self.relu(self.conv(x))
+
 
 class Inception(nn.Module):
     """
@@ -31,7 +31,8 @@ class Inception(nn.Module):
         channel_3x3,
         channel_5x5_reduce,
         channel_5x5,
-        channel_pool_proj) -> None:
+        channel_pool_proj
+    ) -> None:
         super().__init__()
         self.branch_1x1 = BasicConv2d(
             in_channels=in_channels,
@@ -92,7 +93,7 @@ class Inception(nn.Module):
 
         outputs = [branch_1x1, branch_3x3, branch_5x5, branch_pooling]
         # [batch, channel, height, weight]
-        return torch.concat(outputs, dim=1) 
+        return torch.cat(outputs, dim=1)
 
 
 class AuxiliaryClassifier(nn.Module):
