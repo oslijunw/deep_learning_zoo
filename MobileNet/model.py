@@ -1,17 +1,10 @@
-from hashlib import new
-from re import T
-import re
-from stringprep import in_table_c11
-from tkinter.messagebox import NO
-from unittest import removeResult
-from unittest.util import _MIN_COMMON_LEN
 import torch
 import torch.nn as nn
 
 
 class ConvBNReLU6(nn.Sequential):
     def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, groups=1):
-        padding = (kernel_size-1) // 2
+        padding = (kernel_size - 1) // 2
         super().__init__(
             nn.Conv2d(
                 in_channels=in_channel,
@@ -34,7 +27,6 @@ class InvertedResidual(nn.Module):
         # 中间dw卷积的输入特征矩阵大小
         hidden_channel = in_channel * expand_ratio
 
-
         self.short_cut_available = stride == 1 and out_channel == in_channel
 
         layers = []
@@ -44,7 +36,7 @@ class InvertedResidual(nn.Module):
             layers.append(
                 ConvBNReLU6(in_channel=in_channel, out_channel=hidden_channel, kernel_size=1)
             )
-        layers.expand([
+        layers.extend([
             # 3x3 depthwise conv
             ConvBNReLU6(
                 in_channel=hidden_channel,
@@ -79,7 +71,7 @@ def _make_divisible(pre_channel_num, divisor=8, min_ch=None):
     if min_ch is None:
         min_ch = divisor
     # // 自动向下取整，max第二个参数，相当于寻找距离pre_channel_num最近的8的倍数的channel
-    new_ch = max(min_ch, int(pre_channel_num + divisor/2)//divisor*divisor)
+    new_ch = max(min_ch, int(pre_channel_num + divisor / 2) // divisor * divisor)
     if new_ch < .9 * pre_channel_num:
         # 确保减少的不超过10%
         new_ch += divisor
@@ -89,12 +81,12 @@ def _make_divisible(pre_channel_num, divisor=8, min_ch=None):
 class MobileNetV2(nn.Module):
     def __init__(self, num_classes=1000, alpha=1.0, round_nearest=8) -> None:
         super().__init__()
-        
+
         block = InvertedResidual
         # 第一个block开始的输入channel
-        in_channel = _make_divisible(32*alpha, round_nearest)
+        in_channel = _make_divisible(32 * alpha, round_nearest)
         # 全部block卷积之后的channel
-        last_channel = _make_divisible(1280*alpha, round_nearest)
+        last_channel = _make_divisible(1280 * alpha, round_nearest)
 
         inverted_residual_config = [
             # t c n s
@@ -114,19 +106,22 @@ class MobileNetV2(nn.Module):
         )
         # build inverted residual blocks
         for t, c, n, s in inverted_residual_config:
-            out_channel = _make_divisible(c*alpha, round_nearest)
+            out_channel = _make_divisible(c * alpha, round_nearest)
             for i in range(n):
                 stride = s if i == 0 else 1
-                inverted_residual_block = block(in_channel=in_channel, out_channel=out_channel, stride=stride)
+                inverted_residual_block = block(in_channel=in_channel,
+                                                out_channel=out_channel,
+                                                stride=stride,
+                                                expand_ratio=t)
                 features.append(inverted_residual_block)
                 in_channel = out_channel
 
         # 1x1 conv after bottleneck
         # last_channel 硬编码成1280也行
         features.append(ConvBNReLU6(in_channel=in_channel, out_channel=last_channel, kernel_size=1))
-        
+
         self.features = nn.Sequential(*features)
-        
+
         # 每一个channel都转化为1x1的样子
         self.avg_pooling = nn.AdaptiveAvgPool2d((1, 1))
 
@@ -134,7 +129,7 @@ class MobileNetV2(nn.Module):
             nn.Dropout(.2),
             nn.Linear(last_channel, num_classes)
         )
-    
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out')
@@ -146,7 +141,6 @@ class MobileNetV2(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.ones_(m.weight)
                 nn.init.zeros_(m.bias)
-
 
     def forward(self, x):
         x = self.features(x)
